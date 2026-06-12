@@ -41,13 +41,38 @@ Sơ đồ Use Case thể hiện sự tương tác giữa người dùng (Ngườ
 Sau đây là đặc tả chi tiết cho 3 Use Case cốt lõi nhất của hệ thống, được trình bày thông qua bảng đặc tả.
 
 % Bảng đặc tả Use Case 1
-\begin{table}[H]
-    \centering
-    \caption{Đặc tả Use Case: Khám phá và Tìm kiếm truyện}
-    \label{tab:uc_discover}
-    \begin{tabular}{|p{3.5cm}|p{11.5cm}|}
+% \begin{table}[H]
+%     \centering
+%     \caption{Đặc tả Use Case: Khám phá và Tìm kiếm truyện}
+%     \label{tab:uc_discover}
+%     \begin{tabular}{|p{3.5cm}|p{11.5cm}|}
+%     \hline
+%     \textbf{Thuộc tính} & \textbf{Mô tả} \\ \hline
+%     \textbf{Mã UC} & UC-01 \\ \hline
+%     \textbf{Tên Use Case} & Khám phá và Tìm kiếm truyện \\ \hline
+%     \textbf{Tác nhân} & Người dùng, MangaDex API \\ \hline
+%     \textbf{Mô tả} & Cho phép người dùng duyệt qua danh sách các truyện thịnh hành, truyện mới cập nhật hoặc tìm kiếm truyện theo tên và bộ lọc. \\ \hline
+%     \textbf{Tiền điều kiện} & Ứng dụng đã khởi động và có kết nối Internet ổn định. \\ \hline
+%     \textbf{Hậu điều kiện} & Danh sách các bộ truyện (ảnh bìa, tên truyện) được hiển thị chính xác lên giao diện. \\ \hline
+%     \textbf{Luồng cơ bản} & 
+%     1. Người dùng mở ứng dụng, truy cập vào tab Khám phá hoặc Tìm kiếm. \newline
+%     2. Người dùng nhập từ khóa hoặc chọn các bộ lọc (nếu có). \newline
+%     3. Hệ thống gửi yêu cầu HTTP GET đến MangaDex API với các tham số tương ứng. \newline
+%     4. API trả về chuỗi JSON chứa danh sách truyện. \newline
+%     5. Hệ thống phân tích chuỗi JSON, lưu vào bộ đệm và hiển thị lên giao diện Compose. \\ \hline
+%     \end{tabular}
+% \end{table}
+
+\begin{longtable}{|p{3.5cm}|p{11.5cm}|}
+    \caption{Đặc tả Use Case: Khám phá và Tìm kiếm truyện} \label{tab:uc_discover} \\
     \hline
     \textbf{Thuộc tính} & \textbf{Mô tả} \\ \hline
+    \endfirsthead % Đánh dấu kết thúc tiêu đề ở trang đầu tiên
+
+    \hline
+    \textbf{Thuộc tính} & \textbf{Mô tả} (tiếp theo) \\ \hline
+    \endhead % Định nghĩa tiêu đề sẽ lặp lại khi sang trang mới
+
     \textbf{Mã UC} & UC-01 \\ \hline
     \textbf{Tên Use Case} & Khám phá và Tìm kiếm truyện \\ \hline
     \textbf{Tác nhân} & Người dùng, MangaDex API \\ \hline
@@ -60,8 +85,7 @@ Sau đây là đặc tả chi tiết cho 3 Use Case cốt lõi nhất của hệ
     3. Hệ thống gửi yêu cầu HTTP GET đến MangaDex API với các tham số tương ứng. \newline
     4. API trả về chuỗi JSON chứa danh sách truyện. \newline
     5. Hệ thống phân tích chuỗi JSON, lưu vào bộ đệm và hiển thị lên giao diện Compose. \\ \hline
-    \end{tabular}
-\end{table}
+\end{longtable}
 
 % Bảng đặc tả Use Case 2
 \begin{table}[H]
