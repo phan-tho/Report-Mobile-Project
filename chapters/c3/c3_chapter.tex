@@ -1,36 +1,147 @@
+\chapter{Phân tích yêu cầu và thiết kế hệ thống}
 
+Chương này đi sâu vào việc phân tích các yêu cầu của ứng dụng MyBooksLibrary, từ đó xây dựng các biểu đồ Use Case và biểu đồ tuần tự nhằm mô hình hóa hành vi và luồng hoạt động của phần mềm.
 
+\section{Phân tích yêu cầu}
 
-\chapter{Phương pháp đề xuất}
-
-\paragraph{Đối với các KLTN giải quyết bài toán nghiên cứu:}
-
+\subsection{Yêu cầu chức năng}
+Ứng dụng cần đáp ứng các chức năng cốt lõi sau để đảm bảo trải nghiệm đọc truyện trọn vẹn:
 \begin{itemize}
-    \item Tiêu đề của chương thường là ``Phương pháp đề xuất/Mô hình đề xuất cho bài toán XYZ''. 
-    \item Chương này cần trình bày được:
-    \begin{itemize}
-        \item Tổng quan phương pháp/Kiến trúc tổng thể
-        \item Mô hình/thuật toán/phương pháp chi tiết
-        \item Cần lý giải được vì sao giải quyết bài toán như vậy, phân tích ưu, nhược điểm 
-    \end{itemize}
+    \item \textbf{Khám phá và tìm kiếm:} Hệ thống cho phép người dùng xem danh sách các truyện mới cập nhật, truyện phổ biến và tìm kiếm truyện theo từ khóa, thể loại hoặc tác giả.
+    \item \textbf{Xem chi tiết và đọc truyện:} Hiển thị đầy đủ thông tin metadata của truyện (tóm tắt, đánh giá, trạng thái). Trình đọc (Reader) hỗ trợ tải trang truyện mượt mà, cho phép vuốt dọc hoặc ngang để chuyển trang.
+    \item \textbf{Quản lý thư viện cá nhân:} Người dùng có thể lưu (bookmark) truyện yêu thích vào thư viện để dễ dàng theo dõi. Hệ thống tự động ghi nhận chương đang đọc dở để người dùng tiếp tục đọc ở lần mở ứng dụng sau.
+    \item \textbf{Tải xuống ngoại tuyến:} Hỗ trợ tải các chương truyện về bộ nhớ cục bộ của thiết bị để có thể đọc khi không có kết nối mạng.
+    \item \textbf{Đồng bộ dữ liệu:} Cho phép đăng nhập qua tài khoản Google để sao lưu và đồng bộ hóa thư viện cá nhân, lịch sử đọc lên máy chủ đám mây.
 \end{itemize}
 
-\paragraph{Đối với các KTLN xây dựng hệ thống:}
+\subsection{Yêu cầu phi chức năng}
+Bên cạnh các tính năng nghiệp vụ, hệ thống cần đảm bảo các tiêu chuẩn kỹ thuật sau:
 \begin{itemize}
-    \item Tiêu đề của chương thường là ``Phân tích và thiết kế hệ thống XYZ''.
-    \item Chương này cần trình bày được:
-    \begin{itemize}
-        \item Phân tích yêu cầu
-        \item Kiến trúc tổng quan của hệ thống
-        \item Thiết kế hệ thống chi tiết: Biểu đồ ca sử dụng, các biểu đồ tuần tự, biểu đồ luồng hoạt động, biểu đồ lớp cho các ca sử dụng chính
-        \item Thiết kế CSDL
-    \end{itemize}
+    \item \textbf{Hiệu năng:} Thời gian tải màn hình danh sách và nội dung trang truyện không được vượt quá 3 giây trong điều kiện mạng ổn định. Giao diện vuốt trang phải đạt 60 FPS (khung hình/giây).
+    \item \textbf{Khả năng tương thích:} Ứng dụng phải hoạt động ổn định trên các thiết bị Android từ API level 30 (Android 11) trở lên, tự động điều chỉnh giao diện phù hợp với nhiều kích thước màn hình (điện thoại, máy tính bảng).
+    \item \textbf{Tính khả dụng ngoại tuyến:} Các truyện đã tải xuống phải được truy xuất và đọc mượt mà ngay cả khi thiết bị ngắt kết nối Internet hoàn toàn.
+    \item \textbf{Kiến trúc mã nguồn:} Mã nguồn phải tuân thủ nghiêm ngặt nguyên lý Clean Architecture và SOLID, giúp dễ dàng bảo trì và mở rộng tính năng sau này.
 \end{itemize}
 
-Lưu ý:
-\begin{itemize}
-    \item \textbf{Không} đưa các bảng biểu/hình ảnh không liên quan vào KLTN
-    \item Tiêu đề Bảng đặt trên bảng, tiêu đề Hình đặt dưới hình
-    \item Toàn bộ hình ảnh, bảng biểu phải được tham chiếu và giải thích rõ ràng. \textbf{Không} chấp nhận các KLTN với các mục chỉ có hình/bảng không có giải thích/mô tả/thảo luận. 
-    \item \textbf{Không} viết KLTN theo dạng ``gạch đầu dòng'' để đảm bảo rõ ràng và liền mạch trong việc giải thích và lập luận.
-\end{itemize}
+\section{Thiết kế hệ thống chi tiết}
+
+\subsection{Sơ đồ Use Case tổng quát}
+Sơ đồ Use Case thể hiện sự tương tác giữa người dùng (Người đọc) và hệ thống ứng dụng, cũng như sự giao tiếp của ứng dụng với các hệ thống bên ngoài (MangaDex API, Firebase).
+
+\begin{figure}[H]
+    \centering
+    % TODO: Chèn ảnh Sơ đồ Use case tổng ở đây
+    \includegraphics[width=0.8\textwidth]{usecase_tong.png}
+    \caption{Sơ đồ Use Case tổng quát của ứng dụng MyBooksLibrary}
+    \label{fig:usecase_tong}
+\end{figure}
+
+\subsection{Đặc tả chi tiết các Use Case quan trọng}
+
+Sau đây là đặc tả chi tiết cho 3 Use Case cốt lõi nhất của hệ thống, được trình bày thông qua bảng đặc tả.
+
+% Bảng đặc tả Use Case 1
+\begin{table}[H]
+    \centering
+    \caption{Đặc tả Use Case: Khám phá và Tìm kiếm truyện}
+    \label{tab:uc_discover}
+    \begin{tabular}{|p{3.5cm}|p{11.5cm}|}
+    \hline
+    \textbf{Thuộc tính} & \textbf{Mô tả} \\ \hline
+    \textbf{Mã UC} & UC-01 \\ \hline
+    \textbf{Tên Use Case} & Khám phá và Tìm kiếm truyện \\ \hline
+    \textbf{Tác nhân} & Người dùng, MangaDex API \\ \hline
+    \textbf{Mô tả} & Cho phép người dùng duyệt qua danh sách các truyện thịnh hành, truyện mới cập nhật hoặc tìm kiếm truyện theo tên và bộ lọc. \\ \hline
+    \textbf{Tiền điều kiện} & Ứng dụng đã khởi động và có kết nối Internet ổn định. \\ \hline
+    \textbf{Hậu điều kiện} & Danh sách các bộ truyện (ảnh bìa, tên truyện) được hiển thị chính xác lên giao diện. \\ \hline
+    \textbf{Luồng cơ bản} & 
+    1. Người dùng mở ứng dụng, truy cập vào tab Khám phá hoặc Tìm kiếm. \newline
+    2. Người dùng nhập từ khóa hoặc chọn các bộ lọc (nếu có). \newline
+    3. Hệ thống gửi yêu cầu HTTP GET đến MangaDex API với các tham số tương ứng. \newline
+    4. API trả về chuỗi JSON chứa danh sách truyện. \newline
+    5. Hệ thống phân tích chuỗi JSON, lưu vào bộ đệm và hiển thị lên giao diện Compose. \\ \hline
+    \end{tabular}
+\end{table}
+
+% Bảng đặc tả Use Case 2
+\begin{table}[H]
+    \centering
+    \caption{Đặc tả Use Case: Xem chi tiết và Đọc truyện}
+    \label{tab:uc_read}
+    \begin{tabular}{|p{3.5cm}|p{11.5cm}|}
+    \hline
+    \textbf{Thuộc tính} & \textbf{Mô tả} \\ \hline
+    \textbf{Mã UC} & UC-02 \\ \hline
+    \textbf{Tên Use Case} & Xem chi tiết và Đọc truyện \\ \hline
+    \textbf{Tác nhân} & Người dùng, MangaDex API \\ \hline
+    \textbf{Mô tả} & Người dùng chọn một truyện để xem thông tin chi tiết và truy cập vào giao diện đọc truyện (Reader) để duyệt qua các trang ảnh. \\ \hline
+    \textbf{Tiền điều kiện} & Người dùng đã chọn được một bộ truyện từ danh sách. \\ \hline
+    \textbf{Hậu điều kiện} & Cập nhật trạng thái và tiến độ đọc (chương số mấy, trang số mấy) vào cơ sở dữ liệu cục bộ. \\ \hline
+    \textbf{Luồng cơ bản} & 
+    1. Người dùng nhấn vào một bộ truyện. \newline
+    2. Hệ thống gọi API để lấy thông tin chi tiết và danh sách các chương, hiển thị màn hình Chi tiết truyện. \newline
+    3. Người dùng chọn một chương để đọc. \newline
+    4. Hệ thống tải đường dẫn ảnh của chương đó qua At-Home API và hiển thị màn hình Đọc truyện. \newline
+    5. Người dùng vuốt màn hình để chuyển trang. Coil tự động tải và hiển thị hình ảnh. \newline
+    6. Khi người dùng thoát, hệ thống tự động lưu lại vị trí trang hiện tại vào Room Database. \\ \hline
+    \end{tabular}
+\end{table}
+
+% Bảng đặc tả Use Case 3
+\begin{table}[H]
+    \centering
+    \caption{Đặc tả Use Case: Quản lý Thư viện cá nhân}
+    \label{tab:uc_library}
+    \begin{tabular}{|p{3.5cm}|p{11.5cm}|}
+    \hline
+    \textbf{Thuộc tính} & \textbf{Mô tả} \\ \hline
+    \textbf{Mã UC} & UC-03 \\ \hline
+    \textbf{Tên Use Case} & Quản lý Thư viện cá nhân (Lưu truyện) \\ \hline
+    \textbf{Tác nhân} & Người dùng \\ \hline
+    \textbf{Mô tả} & Cho phép người dùng thêm các truyện đang theo dõi vào thư viện cá nhân để dễ dàng truy cập và nhận thông báo cập nhật. \\ \hline
+    \textbf{Tiền điều kiện} & Đang ở màn hình Chi tiết truyện. \\ \hline
+    \textbf{Hậu điều kiện} & Truyện được lưu thành công vào cơ sở dữ liệu Room cục bộ với trạng thái "Yêu thích". \\ \hline
+    \textbf{Luồng cơ bản} & 
+    1. Ở màn hình Chi tiết truyện, người dùng nhấn nút "Thêm vào Thư viện". \newline
+    2. ViewModel nhận sự kiện và gọi xuống tầng Repository. \newline
+    3. Repository thực hiện câu lệnh Insert/Update dữ liệu (Entity) của truyện vào bảng trong Room Database. \newline
+    4. Flow theo dõi cơ sở dữ liệu phát ra tín hiệu thay đổi dữ liệu. \newline
+    5. Giao diện tự động cập nhật, biểu tượng chuyển sang trạng thái "Đã lưu". \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Luồng hoạt động chính (Sequence Diagrams)}
+
+Để hiểu rõ hơn về cách các thành phần bên trong hệ thống (theo kiến trúc Clean Architecture) tương tác với nhau, phần này trình bày chi tiết luồng hoạt động của hai quy trình cốt lõi bằng biểu đồ tuần tự.
+
+\subsubsection{Luồng lấy danh sách truyện từ MangaDex API}
+
+Luồng hoạt động này mô tả cách dữ liệu di chuyển từ lúc người dùng tương tác với giao diện cho đến khi dữ liệu từ máy chủ bên ngoài được đưa về và hiển thị. 
+
+\begin{figure}[H]
+    \centering
+    % TODO: Chèn ảnh Sơ đồ tuần tự lấy danh sách truyện
+    \includegraphics[width=0.9\textwidth]{figures/FetchListBookApi.png}
+    \caption{Sơ đồ tuần tự: Luồng lấy danh sách truyện từ MangaDex API}
+    \label{fig:seq_fetch_manga}
+\end{figure}
+
+\textbf{Giải thích chi tiết:}
+Khi người dùng truy cập tab Khám phá, tầng \texttt{UI (DiscoverScreen)} kích hoạt hàm \texttt{fetchDiscoverManga()} trong \texttt{DiscoverViewModel}. \texttt{ViewModel} này đóng vai trò xử lý logic Presentation, nó gọi xuống \texttt{MangaRepository} ở tầng Data để yêu cầu danh sách truyện. \texttt{Repository} sử dụng \texttt{MangaDexApi} (Retrofit) để thực hiện một HTTP GET request đến máy chủ. 
+Nếu thành công, chuỗi JSON trả về được parse thành các Object \texttt{MangaListResponseDto}. \texttt{Repository} chuyển đổi Dto này thành \texttt{MangaModel} của tầng Domain và gửi kết quả về \texttt{ViewModel} thông qua \texttt{Flow<Result.Success>}. Cuối cùng, \texttt{ViewModel} cập nhật \texttt{UI State}, và Jetpack Compose phản ứng lại bằng cách recompose để hiển thị danh sách truyện lên màn hình. Trong trường hợp lỗi mạng, một \texttt{Result.Error} sẽ được trả về để hiển thị thông báo lỗi.
+
+\subsubsection{Luồng lưu truyện vào thư viện local bằng Room}
+
+Luồng này mô tả thao tác lưu trữ dữ liệu hoàn toàn ở bộ nhớ cục bộ, bảo đảm tính tức thời và cho phép ứng dụng phản hồi ngay lập tức cho người dùng.
+
+\begin{figure}[H]
+    \centering
+    % TODO: Chèn ảnh Sơ đồ tuần tự lưu truyện vào thư viện
+    \includegraphics[width=0.9\textwidth]{figures/SaveBook.png}
+    \caption{Sơ đồ tuần tự: Luồng lưu truyện vào thư viện cá nhân}
+    \label{fig:seq_save_library}
+\end{figure}
+
+\textbf{Giải thích chi tiết:}
+Từ màn hình chi tiết, khi người dùng nhấn nút "Thêm vào Thư viện", \texttt{MangaDetailScreen} gửi một sự kiện \texttt{toggleLibraryStatus()} tới \texttt{MangaDetailViewModel}. Nhận được tín hiệu, \texttt{ViewModel} gọi phương thức \texttt{insertMangaToLibrary()} của \texttt{LibraryRepository}. \texttt{Repository} sẽ tạo một \texttt{LibraryItemEntity} và dùng \texttt{LibraryDao} để thực thi truy vấn \texttt{@Upsert} vào Room Database. 
+Room Database xử lý lưu trữ vào SQLite thành công. Do \texttt{ViewModel} luôn lắng nghe dữ liệu từ hàm \texttt{observeAll()} (trả về kiểu \texttt{Flow}), việc thay đổi dữ liệu trong database lập tức kích hoạt luồng phát ra dữ liệu mới. Trạng thái \texttt{isFavorite} được cập nhật, và giao diện UI tự động thay đổi (đổi màu biểu tượng trái tim) để báo hiệu thao tác lưu trữ thành công.
