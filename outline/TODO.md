@@ -7,6 +7,12 @@ Phần mã LaTeX cho **Chương 2 (Các công nghệ và thư viện sử dụng
 * **Prompt vẽ ảnh AI:** "A standard Clean Architecture diagram tailored for Android development featuring Presentation layer (MVVM), Domain layer (Use cases, Entities), and Data layer (Repository, Local DB, Remote API)."
 * **Hành động:** Chèn ảnh vào thư mục cấu hình và update tên file.
 
+## Chương 3: Phân tích yêu cầu và thiết kế hệ thống
+1. `usecase_tong.png`: Chụp ảnh hoặc xuất PDF Sơ đồ Use Case tổng quát mà bạn đã vẽ.
+2. `FetchListBookApi.png`: Xuất ảnh Sơ đồ tuần tự lấy danh sách truyện.
+3. `SaveBook.png`: Xuất ảnh Sơ đồ tuần tự lưu truyện.
+4. `db_schema.png`: Lấy đoạn mã Mermaid ERD trong `database_schema.md` (phần 2), dán vào web Mermaid Live Editor, xuất ra dạng PNG/PDF và lưu vào thư mục `figures/` với tên `db_schema.png`.
+
 ## Chương 4: Đánh giá và kiểm thử
 Chương này yêu cầu chèn 4 ảnh chụp màn hình thực tế (screenshot) từ chính điện thoại/máy ảo khi chạy ứng dụng của bạn. Bạn hãy chạy app, chụp màn hình, đặt tên file tương ứng và thả vào thư mục `figures/` nhé:
 1. `screenshot_discover.png`: Chụp giao diện tab Khám phá (Discover) hiển thị danh sách các truyện mới/phổ biến.
