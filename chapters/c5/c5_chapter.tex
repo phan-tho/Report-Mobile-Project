@@ -1,5 +1,32 @@
-\chapter{Thực nghiệm và đánh giá kết quả}
-Trong chương này, khóa luận sẽ báo cáo kết quả thực nghiệm mô hình trên hai tập dữ liệu là: phát hiện mã độc trong tập dữ liệu IoT và phân loại các họ mã độc trong tập dữ liệu Microsoft.
-\section*{Kết luận chương 5}
-\addcontentsline{toc}{section}{Kết luận chương 5}
-Trong chương 5, khóa luận đã trình bày và phân tích kết quả thực nghiệm mô hình học sâu đối với bài toán phát hiện và phân loại mã độc. Tập dữ liệu thử nghiệm mô hình gồm: dữ liệu mã độc IoT và dữ liệu các họ mã độc trong hệ điều hành Microsoft.
+\chapter{Kết luận}
+\label{chap:conclusion}
+
+\section{Kết quả đạt được}
+Trong quá trình thực hiện khóa luận, nhóm phát triển đã hoàn thành việc nghiên cứu, phân tích và xây dựng thành công ứng dụng đọc truyện tranh trực tuyến MyBooksLibrary trên nền tảng di động Android. Dưới đây là các kết quả chính đã đạt được:
+\begin{itemize}
+    \item \textbf{Về mặt lý thuyết:} Đã nghiên cứu và áp dụng thành công các công nghệ tiên tiến nhất của Google dành cho hệ sinh thái Android, bao gồm ngôn ngữ Kotlin, bộ công cụ Jetpack Compose, mô hình Clean Architecture kết hợp MVVM và các thư viện Jetpack cốt lõi (Room, Hilt, Coroutines).
+    \item \textbf{Về mặt thực tiễn (Sản phẩm):} 
+    \begin{itemize}
+        \item Xây dựng thành công ứng dụng giao diện thân thiện, mượt mà và hiện đại.
+        \item Hoàn thiện các tính năng cốt lõi: Khám phá, Tìm kiếm truyện, Đọc truyện (Reader) và Quản lý Thư viện cá nhân.
+        \item Giải quyết tốt bài toán lưu trữ và đọc truyện ngoại tuyến (Offline) bằng cách tải trước dữ liệu hình ảnh xuống thiết bị cục bộ.
+    \end{itemize}
+    \item \textbf{Về quy trình phát triển:} Đã thiết lập thành công hệ thống Tích hợp liên tục (CI) với GitHub Actions, kết hợp cùng các công cụ kiểm thử tự động (Unit Test với JUnit, MockK) nhằm đảm bảo chất lượng mã nguồn đạt chuẩn chuyên nghiệp.
+\end{itemize}
+
+\section{Hạn chế của ứng dụng}
+Mặc dù đã hoàn thiện các chức năng cơ bản, ứng dụng vẫn còn một số điểm hạn chế:
+\begin{itemize}
+    \item \textbf{Phụ thuộc nguồn dữ liệu:} Hiện tại ứng dụng mới chỉ hỗ trợ một nguồn dữ liệu duy nhất là API của MangaDex.
+    \item \textbf{Tính năng cộng đồng:} Chưa hỗ trợ người dùng đăng nhập tài khoản độc lập để bình luận, đánh giá hoặc chia sẻ với những độc giả khác.
+    \item \textbf{Quản lý bộ nhớ:} Cơ chế dọn dẹp bộ nhớ đệm (Cache) của hình ảnh truyện tải về đôi khi chưa tối ưu nếu thiết bị có dung lượng lưu trữ thấp.
+\end{itemize}
+
+\section{Hướng phát triển tương lai}
+Để sản phẩm trở nên hoàn thiện và có thể triển khai thực tế tới đông đảo người dùng, nhóm phát triển đề xuất một số hướng đi trong tương lai:
+\begin{itemize}
+    \item Mở rộng kiến trúc Đa nguồn (Multi-source), cho phép tích hợp dữ liệu từ nhiều trang web truyện tranh khác nhau bằng cơ chế plugin.
+    \item Xây dựng máy chủ độc lập (Backend Server) để cung cấp tính năng đồng bộ hóa lịch sử đọc thời gian thực, bình luận và đánh giá truyện.
+    \item Ứng dụng Trí tuệ nhân tạo (AI) để phân tích hành vi người dùng, từ đó phát triển hệ thống gợi ý (Recommendation System) chính xác hơn.
+    \item Tối ưu hóa tính năng đọc ngoại tuyến: cho phép nén ảnh hoặc chọn chất lượng ảnh khi tải về để tiết kiệm dung lượng.
+\end{itemize}
