@@ -1,0 +1,17 @@
+*.iml
+.claude/*.local.md
+.gradle
+/local.properties
+google-services.json
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+HANDOFF.md
+# Track file templates được chia sẻ với team
+!/.idea/fileTemplates/
+
+**/google-services.json

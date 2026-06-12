@@ -1,0 +1,47 @@
+---
+description: Kiến trúc, tech stack và quy ước code cho MyBooksLibrary (local-first manga reader)
+globs: *
+alwaysApply: true
+---
+
+# MyBooksLibrary – Hướng dẫn cho AI / Cursor Agent
+
+## 1. Nguồn chân lý (Source of Truth)
+- Luôn ưu tiên đọc `docs/BA_Requirements.md` để nắm rõ luồng (Auth/Main/Detail/Reader), tab, và đặc tả entity trước khi triển khai feature mới.
+
+## 2. Kiến trúc & Cấu trúc thư mục
+Dự án áp dụng MVVM + Clean Architecture cơ bản.
+
+| Layer | Vị trí (`app/...`) | Trách nhiệm & Ghi chú |
+|--------|----------------|------------------------|
+| **UI** | `ui/` | Chứa màn hình Compose, `navigation`, `theme`, và `viewmodel`. |
+| **Domain** | `domain/model/` | Chứa model thuần Kotlin (VD: `MangaModel`), tuyệt đối không phụ thuộc Android framework. |
+| **Data Local** | `data/local/` | Chứa Room entities, DAO, `AppDatabase`. |
+| **Data Remote**| `data/remote/` | Chứa `MangaDexApi`, `NetworkModule`, DTOs (trong `models/`). |
+| **Repository** | `data/repository/` | Orchestrate giữa local và remote (VD: `LibraryRepository`, `MangaRepository`). |
+
+## 3. Tech Stack
+- **UI:** Kotlin + Jetpack Compose, Material3.
+- **Navigation:** Navigation Compose.
+- **Local:** Room (dùng KSP) + DataStore.
+- **Network:** Retrofit + OkHttp + Gson.
+- **Image Loading:** Coil (`coil-compose`).
+
+## 4. MangaDex API Conventions
+- **Chapter Feed (`GET /manga/{id}/feed`):**
+  - **Edge Case 1:** Bắt buộc xử lý phân trang bằng vòng lặp (`limit` tối đa 500, dùng `offset` để lấy tiếp) nếu response `total` lớn hơn `limit`.
+  - **Edge Case 2:** Truyền query `includeUnavailable=0` và chủ động filter bỏ các chapter có `attributes.isUnavailable == true` ở client.
+  - **UI Grouping:** Khuyến khích nhóm danh sách trả về theo `attributes.volume` khi hiển thị trên UI.
+- **Base API:** `https://api.mangadex.org/`
+- **DTOs:** Tuân thủ map theo cấu trúc `data`, `attributes`, `relationships` của JSON response.
+- **Cover Art:** Sử dụng URL chuẩn `https://uploads.mangadex.org/covers/{manga_id}/{file_name}`. (Sử dụng/tạo helper như `extractCoverUrl()` trong DTO để parse).
+- **At-Home Image Fetching (Reader):**
+  - Bắt buộc gọi `GET /at-home/server/{chapterId}` để lấy `baseUrl` tạm thời.
+  - URL ảnh phải được build theo chuẩn: `{baseUrl}/{quality}/{chapterHash}/{filename}`.
+  - **CRITICAL SECURITY:** Khởi tạo `ImageLoader` (Coil) với một `OkHttpClient` hoàn toàn ĐỘC LẬP. Tuyệt đối **KHÔNG** đính kèm header Authentication (Bearer token) khi tải ảnh để tránh bị MangaDex@Home chặn (lỗi 403) và rò rỉ token.
+  - Biến `quality` mặc định là `data`, hỗ trợ fallback sang `data-saver`.
+
+## 5. Quy tắc chung
+- **Gradle:** Khai báo phiên bản tại `gradle/libs.versions.toml`. Nếu build báo lỗi source set liên quan đến KSP, kiểm tra flag `android.disallowKotlinSourceSets` trong `gradle.properties`.
+- **Mở rộng an toàn:** Khi thêm endpoint mới -> Khai báo trong `MangaDexApi` + DTO -> Map sang Domain Model -> Thêm vào Repository.
+- **Git:** Không commit secrets (`local.properties` phải được ignore). Ưu tiên các commit nhỏ với message rõ ràng (feature/fix/refactor).

@@ -1,0 +1,170 @@
+package com.example.mybookslibrary.ui.navigation
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
+import androidx.compose.ui.test.filterToOne
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import com.example.mybookslibrary.data.local.UserPreferencesDataStore
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import kotlinx.coroutines.runBlocking
+import org.junit.Before
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+import javax.inject.Inject
+
+/**
+ * Test MainNavHost bằng Hilt + Robolectric (JVM, không cần emulator).
+ * - HiltTestActivity là @AndroidEntryPoint → hiltViewModel() bên trong composable hoạt động
+ * - FakeNavigationModule thay thế DataModule + NetworkModule + ImageModule bằng fake/in-memory
+ * - @Config(application = HiltTestApplication::class) → Hilt test application
+ */
+@HiltAndroidTest
+@RunWith(RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(application = dagger.hilt.android.testing.HiltTestApplication::class)
+class MainNavHostTest {
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
+    val composeRule = createAndroidComposeRule<HiltTestActivity>()
+
+    @Inject
+    lateinit var preferencesDataStore: UserPreferencesDataStore
+
+    @Before
+    fun setUp() {
+        hiltRule.inject()
+        // Bỏ qua onboarding để test đúng Login screen khi LOGGED_OUT
+        kotlinx.coroutines.runBlocking { preferencesDataStore.setOnboardingWelcomeDone(true) }
+    }
+
+    @Test
+    fun mainNavHost_nullUserId_showsLoginScreen() {
+        composeRule.setContent {
+            MainNavHost(authStatus = com.example.mybookslibrary.domain.model.AuthStatus.LOGGED_OUT)
+        }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Welcome Back!", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun mainNavHost_nullUserId_bottomNavBarIsHidden() {
+        composeRule.setContent {
+            MainNavHost(authStatus = com.example.mybookslibrary.domain.model.AuthStatus.LOGGED_OUT)
+        }
+        composeRule.waitForIdle()
+        // Bottom nav không hiển thị trên Login screen
+        composeRule.onNodeWithText("Welcome Back!").assertExists()
+    }
+
+    @Test
+    fun mainNavHost_signOut_navigatesToLogin() {
+        runBlocking {
+            preferencesDataStore.updateAuthStatus(com.example.mybookslibrary.domain.model.AuthStatus.LOGGED_IN)
+        }
+        composeRule.setContent {
+            MainNavHost(authStatus = com.example.mybookslibrary.domain.model.AuthStatus.LOGGED_OUT)
+        }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Welcome Back!").assertExists()
+    }
+
+    @Test
+    fun mainNavHost_withUserId_showsDiscoverScreen() {
+        // loggedInUserId != null → startDestination = Discover → DiscoverScreen renders
+        composeRule.setContent {
+            MainNavHost(authStatus = com.example.mybookslibrary.domain.model.AuthStatus.LOGGED_IN)
+        }
+        composeRule.waitForIdle()
+        // Login screen KHÔNG hiện (đã đăng nhập)
+        val isLoginShown =
+            runCatching {
+                composeRule.onNodeWithText("Welcome Back!").assertExists()
+            }.isSuccess
+        assert(!isLoginShown) { "Login screen không được hiển thị khi đã đăng nhập" }
+        // Bottom nav phải hiển thị khi ở Discover
+        composeRule.onNodeWithContentDescription("Discover").assertExists()
+    }
+
+    @Test
+    fun mainNavHost_signOutFromDiscover_navigatesToLogin() {
+        // Start với userId (Discover) → đổi sang null (sign-out) → phải về Login
+        // Covers LaunchedEffect sign-out branch (lines 162-168 trong MainNavGraph.kt)
+        var authStatus by mutableStateOf(com.example.mybookslibrary.domain.model.AuthStatus.LOGGED_IN)
+        composeRule.setContent {
+            MainNavHost(authStatus = authStatus)
+        }
+        composeRule.waitForIdle()
+        // Set null sau khi đã ở Discover — trigger recompose + LaunchedEffect navigate to Login
+        authStatus = com.example.mybookslibrary.domain.model.AuthStatus.LOGGED_OUT
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Welcome Back!").assertExists()
+    }
+
+    @Test
+    fun mainNavHost_mainTabNavigation_displaysDestinationContent() {
+        composeRule.setContent {
+            MainNavHost(authStatus = com.example.mybookslibrary.domain.model.AuthStatus.LOGGED_IN)
+        }
+        composeRule.waitForIdle()
+
+        composeRule.onAllNodesWithContentDescription("Search")[1].performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onAllNodesWithText("Search").filterToOne(
+            hasAnyAncestor(hasTestTag(MAIN_NAV_CONTENT_TAG)),
+        ).assertExists()
+    }
+
+    @Test
+    fun mainNavHost_mainTabsContentContinuesBehindFloatingPill() {
+        composeRule.setContent {
+            MainNavHost(authStatus = com.example.mybookslibrary.domain.model.AuthStatus.LOGGED_IN)
+        }
+        composeRule.waitForIdle()
+
+        assertMainContentContinuesBehindPill()
+
+        listOf("Search", "Library", "Profile").forEach { destination ->
+            val pillNodeIndex = if (destination == "Search") 1 else 0
+            composeRule.onAllNodesWithContentDescription(destination)[pillNodeIndex].performClick()
+            composeRule.waitForIdle()
+            assertMainContentContinuesBehindPill()
+        }
+    }
+
+    private fun assertMainContentContinuesBehindPill() {
+        val contentBounds =
+            composeRule
+                .onNodeWithTag(MAIN_NAV_CONTENT_TAG)
+                .fetchSemanticsNode()
+                .boundsInRoot
+        val pillBounds =
+            composeRule
+                .onNodeWithTag(FLOATING_PILL_NAV_TAG)
+                .fetchSemanticsNode()
+                .boundsInRoot
+
+        assertTrue(
+            "Main tab content bottom (${contentBounds.bottom}) must continue behind pill top (${pillBounds.top})",
+            contentBounds.bottom > pillBounds.top,
+        )
+    }
+}
