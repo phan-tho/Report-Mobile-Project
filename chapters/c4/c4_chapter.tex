@@ -1,9 +1,77 @@
 \chapter{Kiểm thử và Đánh giá hệ thống}
 \label{chap:testing}
 
-Chương này trình bày các kịch bản kiểm thử thủ công (Manual Testing) nhằm đảm bảo các tính năng cốt lõi của ứng dụng MyBooksLibrary hoạt động đúng với yêu cầu đã đề ra. Đồng thời, chương cũng đưa ra những đánh giá khách quan về ưu, nhược điểm của phần mềm và đề xuất các hướng phát triển trong tương lai.
+Chương này trình bày chi tiết về chiến lược kiểm thử tự động, cấu hình quy trình tích hợp liên tục (CI/CD) và kết quả của quá trình kiểm thử thủ công. Đồng thời, chương cũng đưa ra những đánh giá khách quan về ưu, nhược điểm của phần mềm và đề xuất các hướng phát triển trong tương lai.
 
-\section{Kịch bản kiểm thử (Manual Testing)}
+\section{Kiểm thử tự động (Unit Testing)}
+
+\subsection{Chiến lược kiểm thử trong Clean Architecture}
+Với việc áp dụng Clean Architecture, hệ thống được chia nhỏ thành các tầng riêng biệt, tạo điều kiện thuận lợi cho việc kiểm thử tự động. Chiến lược kiểm thử chính trong dự án tập trung vào:
+\begin{itemize}
+    \item \textbf{Tầng Domain và Data:} Kiểm thử các logic cốt lõi như Use Case, DAO thông qua \texttt{JUnit}. Tầng Data thường kết hợp với thư viện giả lập (Mocking) hoặc \texttt{Robolectric} để kiểm thử các tác vụ truy xuất dữ liệu độc lập với nền tảng Android phần cứng.
+    \item \textbf{Tầng Presentation (UI):} Trọng tâm đặt vào việc kiểm thử các \texttt{ViewModel}. Bằng cách sử dụng thư viện \texttt{MockK}, toàn bộ các phụ thuộc (Dependencies) như \texttt{Repository} hay \texttt{DataStore} đều được giả lập, giúp cô lập hoàn toàn logic của \texttt{ViewModel}.
+\end{itemize}
+
+\subsection{Kịch bản kiểm thử ViewModel tiêu biểu}
+Đoạn mã dưới đây là một kịch bản kiểm thử (Test case) thực tế trích từ \texttt{MangaDetailViewModelTest.kt}. Test case này nhằm xác minh tính đúng đắn của logic xử lý yêu cầu tải xuống một chương truyện ngoại tuyến.
+
+\begin{lstlisting}[language=Kotlin, caption={Trích đoạn Unit Test áp dụng mẫu Arrange - Act - Assert}]
+@Test
+fun startChapterDownload_delegatesToOfflineDownloadManager() = runTest(mainDispatcherRule.dispatcher.scheduler) {
+    // 1. Arrange (Chuan bi)
+    val manager = mockManager()
+    val viewModel = createViewModel(manager)
+    advanceUntilIdle()
+
+    // 2. Act (Hanh dong)
+    viewModel.startChapterDownload(CHAPTER_ID)
+    advanceUntilIdle()
+
+    // 3. Assert (Kiem tra/Xac nhan)
+    coVerify(exactly = 1) { manager.enqueueDownload(MANGA_ID, CHAPTER_ID) }
+}
+\end{lstlisting}
+
+\textbf{Giải thích quy trình (Arrange - Act - Assert):}
+\begin{itemize}
+    \item \textbf{Arrange (Chuẩn bị):} Hệ thống khởi tạo một \texttt{ViewModel} cùng với một \texttt{OfflineDownloadManager} đã được cấu hình giả lập (mock). Luồng thời gian coroutines được giả lập thông qua \texttt{advanceUntilIdle()} để các tiến trình bất đồng bộ khởi tạo ban đầu hoàn tất.
+    \item \textbf{Act (Hành động):} Kích hoạt phương thức \texttt{startChapterDownload()} mô phỏng việc người dùng thao tác nhấn nút "Tải xuống" trên giao diện.
+    \item \textbf{Assert (Xác nhận):} Sử dụng hàm \texttt{coVerify} của MockK để kiểm chứng xem \texttt{ViewModel} có thực sự giao phó (delegate) nhiệm vụ bằng cách gọi đúng phương thức \texttt{enqueueDownload} của trình quản lý tải xuống (manager) với tham số chính xác hay không. Nếu phương thức được gọi đúng 1 lần (\texttt{exactly = 1}), bài kiểm thử đạt yêu cầu (Pass).
+\end{itemize}
+
+\section{Tích hợp liên tục (CI) với GitHub Actions}
+Để hiện thực hóa việc tự động hóa kiểm thử, dự án áp dụng hệ thống CI/CD trên nền tảng GitHub Actions.
+
+\subsection{Luồng quy trình CI tự động}
+Mỗi khi lập trình viên tạo một thao tác đẩy mã (Push) hoặc tạo Yêu cầu gộp mã (Pull Request) lên nhánh \texttt{main}, GitHub Actions sẽ tự động kích hoạt luồng CI thông qua tệp cấu hình \texttt{ci.yml}.
+
+\begin{figure}[H]
+    \centering
+    % TODO: Chèn ảnh Sơ đồ luồng CI/CD (CIflow.pdf)
+    \includegraphics[width=0.9\textwidth]{figures/CIflow.pdf}
+    \caption{Sơ đồ quy trình Tích hợp liên tục (CI/CD) tự động qua GitHub Actions}
+    \label{fig:ci_flow}
+\end{figure}
+
+Quá trình này bao gồm các tác vụ chính:
+\begin{enumerate}
+    \item \textbf{Lọc thay đổi (changes):} Phân tích mã nguồn để quyết định việc chạy các khâu kiểm thử phù hợp nhằm tối ưu hiệu suất máy chủ lưu trữ.
+    \item \textbf{Phân tích tĩnh (static-analysis):} Quét toàn bộ mã nguồn bằng Android Lint và Detekt để đảm bảo cấu trúc và chất lượng mã đáp ứng tiêu chuẩn.
+    \item \textbf{Biên dịch và Unit Test (build-test):} Tự động biên dịch ứng dụng ra định dạng APK và chạy toàn bộ Unit test. Sau đó, tiến hành đo lường độ phủ mã (Code Coverage). Nếu tỷ lệ bao phủ dưới mức 85\%, tiến trình sẽ tự động bị hủy bỏ và báo lỗi (Fail).
+    \item \textbf{Kiểm thử giao diện (emulator-test):} Tự động khởi tạo máy ảo Android (AVD) ngay trên server để chạy các bài test giao diện thực tế liên quan đến vòng đời UI.
+\end{enumerate}
+
+Nhờ sự giám sát chặt chẽ và tự động hóa này, ứng dụng đảm bảo không có đoạn mã lỗi nào vô tình lọt vào luồng chính, tiết kiệm đáng kể thời gian rà soát thủ công.
+
+\begin{figure}[H]
+    \centering
+    % TODO: Chèn ảnh màn hình GitHub Actions Job báo Success
+    \includegraphics[width=0.85\textwidth]{figures/github_actions_success.png}
+    \caption{Kết quả chạy GitHub Actions thành công trên giao diện web}
+    \label{fig:ci_success}
+\end{figure}
+
+\section{Kiểm thử thủ công (Manual Testing)}
 Quá trình kiểm thử được thực hiện trực tiếp trên thiết bị di động thật (chạy hệ điều hành Android) nhằm đánh giá trải nghiệm thực tế của người dùng. Các bảng dưới đây trình bày kịch bản và kết quả kiểm thử cho 4 tính năng quan trọng nhất.
 
 \subsection{Kiểm thử chức năng Khám phá và Tìm kiếm}

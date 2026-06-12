@@ -32,3 +32,5 @@ Chương này yêu cầu chèn 4 ảnh chụp màn hình thực tế (screenshot
 2. `screenshot_search.png`: Chụp giao diện lúc đang tìm kiếm hoặc mở bộ lọc (Search Filter).
 3. `screenshot_reader.png`: Chụp lúc đang đọc truyện (hiển thị trang truyện, có thể vuốt lên một chút để thấy nội dung).
 4. `screenshot_library.png`: Chụp giao diện tab Thư viện cá nhân chứa các truyện đã lưu.
+5. `CIflow.pdf`: Lấy đoạn code sơ đồ luồng CI trong `testing_ci_context.md`, dán vào mermaid.live và xuất ra file PDF (hoặc PNG rồi đổi thành `CIflow.png` và sửa tên trong code LaTeX tương ứng).
+6. `github_actions_success.png`: Chụp lại màn hình một workflow "CI" trên tab Actions của GitHub báo dấu tick xanh thành công.

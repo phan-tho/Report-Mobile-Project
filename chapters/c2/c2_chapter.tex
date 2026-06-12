@@ -151,3 +151,44 @@ interface MangaDexApi {
 \end{lstlisting}
 
 Ngoài ra, dự án sử dụng thư viện \textbf{Coil} (Coroutine Image Loader) được tích hợp sâu với Jetpack Compose thông qua hàm \texttt{AsyncImage} để tự động tải, giải mã và hiển thị hình ảnh (ảnh bìa truyện, trang truyện) trực tiếp từ các URL trả về của Retrofit.
+
+\section{Công nghệ Kiểm thử và Tích hợp liên tục (CI/CD)}
+
+Để đảm bảo chất lượng phần mềm và tự động hóa quy trình phát triển, dự án áp dụng các công cụ kiểm thử hiện đại cùng hệ thống Tích hợp liên tục (Continuous Integration).
+
+\subsection{Framework Kiểm thử}
+Dự án chú trọng đến việc viết Unit Test cho tầng logic nghiệp vụ nhằm hạn chế rủi ro lỗi trong quá trình mở rộng tính năng. Các thư viện kiểm thử cốt lõi bao gồm:
+\begin{itemize}
+    \item \textbf{JUnit:} Framework kiểm thử tiêu chuẩn trên nền tảng Java/Kotlin, giúp thực thi các test case nhanh chóng trên môi trường máy ảo JVM.
+    \item \textbf{MockK:} Thư viện giả lập (mocking) mạnh mẽ dành riêng cho Kotlin. MockK được dùng để tạo các đối tượng giả cho tầng \texttt{Repository} hay \texttt{DataStore}, qua đó cô lập \texttt{ViewModel} khỏi các sự phụ thuộc bên ngoài khi tiến hành kiểm thử.
+    \item \textbf{Coroutines Test:} Cung cấp các công cụ như \texttt{runTest} và \texttt{TestDispatcher} để kiểm thử an toàn các tác vụ bất đồng bộ (suspend functions).
+\end{itemize}
+
+\subsection{Tích hợp liên tục với GitHub Actions}
+GitHub Actions được lựa chọn làm hệ thống CI/CD do tính tiện dụng và sự gắn kết chặt chẽ với kho lưu trữ mã nguồn GitHub. Mỗi khi lập trình viên thực hiện thao tác đẩy mã (push) hoặc tạo yêu cầu gộp mã (Pull Request) vào nhánh chính, hệ thống sẽ tự động kích hoạt luồng quy trình (workflow). 
+
+Luồng này đảm nhiệm các công việc quan trọng như: chạy kiểm tra chuẩn mực mã (Lint, Detekt), thực thi toàn bộ Unit Test, đo lường độ bao phủ mã (Code Coverage), và cuối cùng là tự động biên dịch ra tệp tin cài đặt APK. Nhờ vậy, dự án luôn duy trì được tính ổn định và ngăn ngừa các đoạn mã lỗi hòa trộn vào sản phẩm. 
+
+Dưới đây là một trích đoạn từ file cấu hình \texttt{ci.yml} tiêu biểu:
+
+\begin{lstlisting}[caption={Trích đoạn cấu hình GitHub Actions (ci.yml) chạy tự động kiểm thử và build ứng dụng}]
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Unit test and APK builds
+        run: ./gradlew testDebugUnitTest assembleDebug
+\end{lstlisting}
