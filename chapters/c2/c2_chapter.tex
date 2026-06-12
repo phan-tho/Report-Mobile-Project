@@ -1,18 +1,153 @@
-\chapter{Cơ sở lý thuyết}
+\chapter{Các công nghệ và thư viện sử dụng}
 
-Trong chương này cần trình bày được các kiến thức cơ sở là nền tảng cần thiết để người đọc hiểu đầy đủ các phương pháp được trình bày ở các chương sau. Chương này thường bao gồm các nội dung sau:
+Chương này trình bày chi tiết về các nền tảng, ngôn ngữ lập trình, kiến trúc hệ thống và các thư viện cốt lõi được áp dụng trong quá trình xây dựng ứng dụng MyBooksLibrary. Đối với mỗi công nghệ, cơ sở lý thuyết sẽ được giới thiệu kết hợp với các đoạn mã nguồn minh hoạ thực tế từ dự án.
+
+\section{Ngôn ngữ Kotlin và Jetpack Compose}
+\subsection{Ngôn ngữ Kotlin}
+Kotlin là một ngôn ngữ lập trình kiểu tĩnh (statically typed) do JetBrains phát triển, hiện được Google công nhận là ngôn ngữ chính thức và ưu tiên hàng đầu (Kotlin-first) để phát triển ứng dụng Android. Kotlin giúp giảm thiểu mã rập khuôn (boilerplate code), tăng tính an toàn (đặc biệt là Null Safety) và hỗ trợ mạnh mẽ lập trình bất đồng bộ thông qua Coroutines.
+
+\subsection{Bộ công cụ Jetpack Compose}
+Jetpack Compose là bộ công cụ xây dựng giao diện người dùng (UI) hiện đại của Android theo mô hình khai báo (Declarative UI). Thay vì sử dụng XML để thiết kế giao diện như trước đây, lập trình viên sử dụng trực tiếp mã Kotlin để định nghĩa UI. Compose tự động cập nhật lại (recompose) giao diện khi trạng thái (state) thay đổi.
+
+\begin{figure}[H]
+    \centering
+    % TODO: Chèn ảnh kiến trúc Compose vào đây
+    \includegraphics[width=0.8\textwidth]{placeholder_compose.png}
+    \caption{Mô hình hoạt động của Jetpack Compose}
+    \label{fig:compose}
+\end{figure}
+
+Đoạn mã sau trích xuất từ \texttt{DiscoverScreen.kt} minh hoạ cách định nghĩa một thành phần giao diện (Composable) để hiển thị danh sách truyện:
+
+\begin{lstlisting}[language=Kotlin, caption={Định nghĩa giao diện màn hình Khám phá bằng Jetpack Compose}]
+@Composable
+fun DiscoverScreenContent(
+    modifier: Modifier = Modifier,
+    vm: DiscoverViewModel = hiltViewModel(),
+) {
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
+
+    Scaffold(
+        topBar = { EditorialTopBar(...) },
+        containerColor = MaterialTheme.colorScheme.background,
+    ) { innerPadding ->
+        PullToRefreshBox(
+            isRefreshing = uiState.isLoading && uiState.items.isNotEmpty(),
+            onRefresh = { vm.loadDiscover() },
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            // Hien thi danh sach truyen (LazyColumn / LazyVerticalGrid)
+        }
+    }
+}
+\end{lstlisting}
+
+\section{Kiến trúc Clean Architecture và mô hình MVVM}
+\subsection{Clean Architecture}
+Clean Architecture là một mẫu kiến trúc phần mềm do Robert C. Martin (Uncle Bob) đề xuất, nhằm chia nhỏ hệ thống thành các tầng (layer) độc lập với nhau, lấy các quy tắc nghiệp vụ (Domain/Business logic) làm trung tâm. Trong dự án, ứng dụng được chia thành 3 tầng chính:
 \begin{itemize}
-    \item Các khái niệm, định nghĩa cơ bản
-    \item Các mô hình, phương pháp, thuật toán nền tảng
-    \item Các công cụ, công nghệ, nền tảng liên quan
-    \item Các giải pháp/nghiên cứu liên quan
+    \item \textbf{Domain Layer:} Chứa các định nghĩa Use Case, Model. Không phụ thuộc vào Android framework.
+    \item \textbf{Data Layer:} Chứa Repository và Data Source (API, Database).
+    \item \textbf{Presentation (UI) Layer:} Chứa giao diện (Compose) và ViewModel.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    % TODO: Chèn ảnh Clean Architecture + MVVM vào đây
+    \includegraphics[width=0.8\textwidth]{placeholder_clean_architecture.png}
+    \caption{Sơ đồ kiến trúc Clean Architecture kết hợp MVVM}
+    \label{fig:clean_arch}
+\end{figure}
+
+\subsection{Mô hình MVVM (Model - View - ViewModel)}
+Mô hình MVVM được sử dụng ở tầng Presentation. \textbf{ViewModel} đóng vai trò giữ và quản lý dữ liệu cho \textbf{View} (UI), đồng thời xử lý các tương tác của người dùng để gọi xuống tầng \textbf{Domain/Data}. Trong Kotlin, ViewModel sử dụng \texttt{StateFlow} để phát (emit) dữ liệu lên View một cách phản ứng (reactive).
+
+\begin{lstlisting}[language=Kotlin, caption={Khởi tạo ViewModel và quản lý StateFlow trong MangaDetailViewModel.kt}]
+@HiltViewModel
+class MangaDetailViewModel @Inject constructor(
+    private val mangaRepository: MangaRepository,
+    private val libraryRepository: LibraryRepository,
+) : ViewModel() {
     
-\end{itemize}
+    private val _uiState = MutableStateFlow(MangaDetailUiState())
+    val uiState: StateFlow<MangaDetailUiState> = _uiState.asStateFlow()
 
-Lưu ý:
+    private fun loadMangaDetail(mangaId: String) {
+        viewModelScope.launch(ioDispatcher) {
+            mangaRepository.getMangaDetail(mangaId).onSuccess { manga ->
+                _uiState.update { it.copy(mangaDetail = manga) }
+            }
+        }
+    }
+}
+\end{lstlisting}
 
-\begin{itemize}
-    \item Cần tham chiếu đến các tài liệu tham khảo \textbf{đúng} và \textbf{đủ}. Thiếu tham chiếu đến tài liệu tham khảo coi như sao chép.
-    \item \textbf{Không} chép lại nội dung từ các tài liệu tham khảo, SV cần diễn đạt lại các nội dung tương ứng phù hợp với bài toán và phạm vi của KLTN
-    \item Đối với các KLTN xây dựng hệ thống, nội dung của chương này chỉ tập trung trình bày các công cụ/công nghệ sử dụng (không đi sâu lý thuyết/thuật toán) thì có thể đổi tên tiêu đề thành ``Nền tảng và công nghệ sử dụng''
-\end{itemize}
+\section{Dependency Injection với Hilt}
+Hilt là một thư viện tiêm phụ thuộc (Dependency Injection - DI) dành riêng cho Android, được xây dựng dựa trên nền tảng Dagger. Hilt giúp giảm thiểu các đoạn mã khởi tạo lặp đi lặp lại bằng cách tự động cung cấp các đối tượng (instance) cần thiết vào các class, ví dụ như tự động tiêm \texttt{Repository} vào \texttt{ViewModel}.
+
+\begin{figure}[H]
+    \centering
+    % TODO: Chèn ảnh Hilt vào đây
+    \includegraphics[width=0.8\textwidth]{placeholder_hilt.png}
+    \caption{Cơ chế Tiêm phụ thuộc của Hilt trong Android}
+    \label{fig:hilt}
+\end{figure}
+
+Bằng cách sử dụng các annotation như \texttt{@HiltViewModel} và \texttt{@Inject}, Hilt sẽ tự động khởi tạo và tiêm \texttt{MangaRepository} vào \texttt{MangaDetailViewModel} mà không cần lập trình viên phải gọi hàm khởi tạo (như đã thấy ở đoạn mã trên).
+
+\section{Cơ sở dữ liệu cục bộ với Room Database}
+Room là một thư viện ORM (Object-Relational Mapping) nằm trong hệ sinh thái Android Jetpack, đóng vai trò như một lớp trừu tượng bao bọc SQLite. Room giúp thao tác với cơ sở dữ liệu bằng cách sử dụng các đối tượng Java/Kotlin thay vì viết câu lệnh SQL thuần túy, đồng thời kiểm tra lỗi SQL ngay lúc biên dịch.
+
+Trong ứng dụng, Room được sử dụng để lưu trữ danh sách truyện yêu thích và tiến trình đọc của người dùng. Các thao tác truy xuất dữ liệu được định nghĩa thông qua các Data Access Object (DAO).
+
+\begin{figure}[H]
+    \centering
+    % TODO: Chèn ảnh Room vào đây
+    \includegraphics[width=0.7\textwidth]{placeholder_room.png}
+    \caption{Các thành phần cốt lõi của Room Database}
+    \label{fig:room}
+\end{figure}
+
+\begin{lstlisting}[language=Kotlin, caption={Định nghĩa LibraryDao.kt sử dụng Room}]
+@Dao
+interface LibraryDao {
+    @Upsert
+    suspend fun upsert(item: LibraryItemEntity)
+
+    @Query("SELECT * FROM library_items WHERE sync_status != 'PENDING_DELETE'")
+    fun observeAll(): Flow<List<LibraryItemEntity>>
+
+    @Query("UPDATE library_items SET is_favorite = :isFavorite WHERE manga_id = :mangaId")
+    suspend fun updateFavorite(mangaId: String, isFavorite: Boolean): Int
+}
+\end{lstlisting}
+
+\section{Giao tiếp mạng với Retrofit và Coroutines}
+Retrofit là một Client HTTP an toàn về kiểu (type-safe) phổ biến nhất cho Android. Retrofit cho phép định nghĩa các REST API thông qua các Interface và Annotation. Trong dự án này, Retrofit được kết hợp với Kotlin Coroutines (\texttt{suspend fun}) và Kotlinx Serialization để gọi API MangaDex một cách bất đồng bộ và tự động chuyển đổi chuỗi JSON trả về thành các đối tượng Kotlin.
+
+\begin{figure}[H]
+    \centering
+    % TODO: Chèn ảnh Retrofit vào đây
+    \includegraphics[width=0.7\textwidth]{placeholder_retrofit.png}
+    \caption{Sơ đồ luồng giao tiếp HTTP qua Retrofit}
+    \label{fig:retrofit}
+\end{figure}
+
+\begin{lstlisting}[language=Kotlin, caption={Sử dụng Retrofit định nghĩa các Endpoint trong MangaDexApi.kt}]
+interface MangaDexApi {
+    @GET("manga")
+    suspend fun getMangaList(
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int,
+        @Query("includes[]") includes: List<String> = listOf("cover_art"),
+    ): MangaListResponseDto
+
+    @GET("manga/{mangaId}")
+    suspend fun getMangaDetail(
+        @Path("mangaId") mangaId: String,
+        @Query("includes[]") includes: List<String> = listOf("cover_art"),
+    ): MangaDetailResponseDto
+}
+\end{lstlisting}
+
+Ngoài ra, dự án sử dụng thư viện \textbf{Coil} (Coroutine Image Loader) được tích hợp sâu với Jetpack Compose thông qua hàm \texttt{AsyncImage} để tự động tải, giải mã và hiển thị hình ảnh (ảnh bìa truyện, trang truyện) trực tiếp từ các URL trả về của Retrofit.

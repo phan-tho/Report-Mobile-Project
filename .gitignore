@@ -4,3 +4,10 @@ thesis.blg
 thesis.fdb_latexmk
 thesis.synctex.gz
 .DS_Store
+thesis.fls
+thesis.out
+thesis.ilg
+thesis.lof
+thesis.log
+thesis.lot
+thesis.toc
