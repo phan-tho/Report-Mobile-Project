@@ -1,11 +1,45 @@
 \chapter{Đặt vấn đề}
 
-Chương này cần trình bày được:
+\section{Bối cảnh và lý do chọn đề tài}
+Trong kỷ nguyên công nghệ số và sự phát triển mạnh mẽ của các thiết bị di động thông minh, thói quen tiếp cận thông tin và giải trí của con người đã trải qua những thay đổi sâu sắc. Một trong số đó là sự chuyển dịch từ việc đọc sách, truyện tranh in ấn truyền thống sang các nền tảng kỹ thuật số. Đặc biệt, đối với thể loại truyện tranh (manga, manhwa, comic), sự phát triển của Internet đã kéo theo sự ra đời của hàng loạt các dịch vụ lưu trữ và phân phối nội dung trực tuyến. Người dùng ngày càng có nhu cầu tiếp cận với hàng ngàn bộ truyện từ khắp nơi trên thế giới một cách nhanh chóng, tiện lợi mọi lúc mọi nơi thông qua chiếc điện thoại di động của mình.
+
+Tuy nhiên, thực tế trải nghiệm người dùng trên các nền tảng đọc truyện hiện nay vẫn tồn tại nhiều hạn chế. Việc truy cập qua trình duyệt web trên thiết bị di động thường gặp phải tình trạng tối ưu hóa giao diện kém, tốc độ tải trang chậm do tải quá nhiều thành phần không cần thiết (quảng cáo, script theo dõi), và thiếu khả năng lưu trữ ngoại tuyến (offline) một cách hiệu quả. Hơn nữa, sự phân mảnh của các nguồn truyện khiến người dùng gặp khó khăn trong việc quản lý tập trung thư viện cá nhân, theo dõi tiến độ đọc, và nhận thông báo khi có chương mới. 
+
+Nhận thấy những vấn đề thiết thực trên, việc phát triển một ứng dụng di động chuyên biệt dành cho nền tảng Android, tập trung vào trải nghiệm đọc truyện mượt mà, quản lý thư viện thông minh và tích hợp các công nghệ hiện đại là một hướng đi vô cùng cấp thiết và mang nhiều ý nghĩa thực tiễn. Đề tài "Xây dựng ứng dụng đọc truyện tranh trực tuyến trên nền tảng Android" (MyBooksLibrary) được lựa chọn nhằm cung cấp một giải pháp toàn diện, khắc phục các nhược điểm của việc đọc truyện trên trình duyệt, đồng thời ứng dụng các kiến trúc phần mềm tiên tiến như Clean Architecture, MVVM cùng hệ sinh thái Jetpack Compose để đảm bảo hiệu suất và khả năng mở rộng của phần mềm.
+
+\section{Mô tả bài toán}
+Bài toán đặt ra cho đề tài là thiết kế và phát triển một ứng dụng đọc truyện tranh trên nền tảng hệ điều hành Android, có khả năng kết nối với một nguồn cung cấp dữ liệu truyện tranh trực tuyến (cụ thể là MangaDex API) để truy xuất danh sách truyện, thông tin chi tiết và dữ liệu hình ảnh của các chương truyện. 
+
 \begin{itemize}
-    \item Bối cảnh và lý do chọn đề tài: Bài toán KLTN giải quyết là gì, trong bối cảnh Khoa học/kỹ thuật/thực tiễn như thế nào? Vì sao đề tài này quan trọng và có ý nghĩa?
+    \item \textbf{Đầu vào của bài toán:} Dữ liệu JSON được cung cấp từ các RESTful API của hệ thống MangaDex, bao gồm thông tin metadata của truyện (tên, tác giả, thể loại, mô tả), danh sách các chương, và đường dẫn URL tới các trang ảnh truyện. Ngoài ra, đầu vào còn bao gồm các tương tác của người dùng trên giao diện ứng dụng (tìm kiếm, thêm vào thư viện, vuốt trang, đánh dấu chương đã đọc).
+    \item \textbf{Đầu ra của bài toán:} Một ứng dụng Android hoàn chỉnh với giao diện trực quan, hiển thị nội dung truyện tranh sắc nét, tối ưu hoá cho nhiều kích thước màn hình khác nhau. Hệ thống phải cho phép người dùng đọc truyện trực tiếp, quản lý danh sách truyện yêu thích, thống kê lịch sử đọc, và hỗ trợ tải dữ liệu ảnh về thiết bị để xem ngoại tuyến.
+    \item \textbf{Các giả định:} Thiết bị di động của người dùng chạy hệ điều hành Android có phiên bản SDK tối thiểu là 30. Để thực hiện các thao tác lấy dữ liệu mới và đồng bộ hoá đám mây, thiết bị cần được kết nối với Internet. Đối với các chương truyện đã tải xuống, ứng dụng hoàn toàn có thể hoạt động ngoại tuyến.
+\end{itemize}
 
-    \item Mô tả bài toán: Phát biểu rõ ràng bài toán mà KLTN giải quyết, gồm đầu vào, đầu ra, phạm vi và các giả định (nếu có)
+\section{Mục tiêu và phạm vi nghiên cứu}
 
-    \item Mục tiêu và phạm vi nghiên cứu của KLTN
-    \item Cấu trúc KLTN
+\subsection{Mục tiêu nghiên cứu}
+Mục tiêu cốt lõi của đề tài là xây dựng thành công ứng dụng MyBooksLibrary với giao diện hiện đại, dễ sử dụng, đáp ứng tối đa nhu cầu đọc truyện tranh trên thiết bị di động. Cụ thể, các mục tiêu kỹ thuật bao gồm:
+\begin{itemize}
+    \item Nghiên cứu và áp dụng thành thạo ngôn ngữ Kotlin, kết hợp với bộ công cụ xây dựng giao diện Jetpack Compose.
+    \item Áp dụng kiến trúc Clean Architecture và mô hình MVVM (Model-View-ViewModel) nhằm tạo ra một mã nguồn mạch lạc, dễ bảo trì và có khả năng mở rộng cao.
+    \item Sử dụng Dependency Injection (thông qua thư viện Hilt) để giảm sự phụ thuộc giữa các thành phần trong hệ thống.
+    \item Tích hợp các thư viện xử lý bất đồng bộ (Coroutines/Flow) và giao tiếp mạng (Retrofit, OkHttp) một cách hiệu quả để đảm bảo hiệu năng, tránh tình trạng giật lag trên giao diện người dùng.
+    \item Phát triển cơ chế quản lý dữ liệu cục bộ bằng Room Database để quản lý thư viện cá nhân và lịch sử đọc, đồng thời tích hợp Firebase để hỗ trợ xác thực người dùng và đồng bộ hoá dữ liệu đám mây.
+\end{itemize}
+
+\subsection{Phạm vi nghiên cứu}
+\begin{itemize}
+    \item \textbf{Về nền tảng:} Đề tài chỉ giới hạn phát triển cho hệ điều hành di động Android.
+    \item \textbf{Về dữ liệu:} Ứng dụng hiện tại tích hợp và lấy dữ liệu trực tiếp từ nguồn mở MangaDex API. Đề tài không đi sâu vào việc tự xây dựng backend server chứa nội dung truyện mà chỉ đóng vai trò là một client tiêu thụ API.
+    \item \textbf{Về tính năng:} Ứng dụng tập trung vào các tính năng cốt lõi của một phần mềm đọc truyện: Khám phá truyện, tìm kiếm, hiển thị chi tiết, giao diện đọc (reader) linh hoạt, quản lý thư viện lưu trữ (thêm, xóa, đánh dấu tiến trình), tải xuống offline và đồng bộ hóa cơ bản.
+\end{itemize}
+
+\section{Cấu trúc báo cáo}
+Báo cáo được bố cục thành 4 chương chính nhằm trình bày chi tiết và logic quá trình nghiên cứu, phát triển ứng dụng:
+\begin{itemize}
+    \item \textbf{Chương 1: Đặt vấn đề.} Giới thiệu tổng quan về bối cảnh, lý do chọn đề tài, mô tả bài toán cần giải quyết, cùng với mục tiêu và phạm vi nghiên cứu.
+    \item \textbf{Chương 2: Các công nghệ và thư viện sử dụng.} Tổng hợp các kiến thức cơ sở về ngôn ngữ lập trình, kiến trúc hệ thống (Clean Architecture, MVVM), và phân tích vai trò của các thư viện cốt lõi (Jetpack Compose, Room, Retrofit, Hilt, Coil) được áp dụng trong dự án.
+    \item \textbf{Chương 3: Phân tích yêu cầu và thiết kế hệ thống.} Liệt kê các tính năng của phần mềm, xác định các tác nhân, thiết kế sơ đồ Use Case và xây dựng sơ đồ tuần tự cho các luồng hoạt động chính yếu.
+    \item \textbf{Chương 4: Đánh giá và kiểm thử.} Đưa ra phương pháp kiểm thử (Unit test), quá trình đánh giá tính ổn định, hiệu năng của ứng dụng và tổng kết các kết quả đạt được.
 \end{itemize}
