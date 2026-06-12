@@ -25,3 +25,10 @@ Dưới đây là gợi ý từ khoá tìm kiếm trên Google Images hoặc câ
 ## 5. Hình `placeholder_retrofit.png` (Luồng giao tiếp HTTP qua Retrofit)
 * **Keyword tìm kiếm:** `Retrofit Android architecture diagram`, `Retrofit OkHttp Network flow Android`
 * **Prompt vẽ ảnh AI:** "A block diagram showing an Android app making a network request via Retrofit interface, passing through OkHttp client, hitting a REST API, and returning JSON parsed into Kotlin Data Classes."
+
+## Chương 4: Đánh giá và kiểm thử
+Chương này yêu cầu chèn 4 ảnh chụp màn hình thực tế (screenshot) từ chính điện thoại/máy ảo khi chạy ứng dụng của bạn. Bạn hãy chạy app, chụp màn hình, đặt tên file tương ứng và thả vào thư mục `figures/` nhé:
+1. `screenshot_discover.png`: Chụp giao diện tab Khám phá (Discover) hiển thị danh sách các truyện mới/phổ biến.
+2. `screenshot_search.png`: Chụp giao diện lúc đang tìm kiếm hoặc mở bộ lọc (Search Filter).
+3. `screenshot_reader.png`: Chụp lúc đang đọc truyện (hiển thị trang truyện, có thể vuốt lên một chút để thấy nội dung).
+4. `screenshot_library.png`: Chụp giao diện tab Thư viện cá nhân chứa các truyện đã lưu.
