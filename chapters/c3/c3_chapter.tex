@@ -219,6 +219,14 @@ Trong Android Jetpack, việc ánh xạ từ mô hình ERD lý thuyết sang cơ
 %     suspend fun deleteByMangaId(mangaId: String)
 % }
 % \end{lstlisting}
+\subsection{Chiến lược lưu trữ dữ liệu tải về (Offline Storage)}
+
+Để tối ưu hóa hiệu năng, hệ thống áp dụng chiến lược phân tách giữa "Dữ liệu trạng thái" (State Data) và "Dữ liệu nhị phân" (Binary Data) cho tính năng tải truyện:
+
+\begin{itemize}
+    \item \textbf{Quản lý trạng thái bằng SQLite:} CSDL Room chỉ quản lý hàng đợi tải (\texttt{DownloadQueueEntity}) và lưu cờ trạng thái \texttt{is\_downloaded} trong \\ \texttt{ChapterProgressEntity}. Việc này giúp tránh lưu trữ file ảnh lớn (BLOB) trực tiếp vào SQLite, ngăn chặn tình trạng tràn bộ nhớ \\ (\texttt{CursorWindowAllocationException}) và giữ CSDL luôn gọn nhẹ.
+    \item \textbf{Lưu trữ file vật lý (Internal Storage):} Các trang truyện thực tế được lưu trực tiếp dưới dạng tệp tin ảnh vào bộ nhớ trong của thiết bị với đường dẫn cô lập: \texttt{/files/offline\_manga/\{manga\_id\}/\{chapter\_id\}/}. Tại mỗi thư mục chương sẽ lưu các trang ảnh và một tệp \texttt{.complete} để xác nhận chương đã tải toàn vẹn.
+\end{itemize}
 
 \section{Thiết kế quản lý tài khoản người dùng}
 
