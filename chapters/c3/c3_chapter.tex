@@ -215,14 +215,15 @@ Cơ sở dữ liệu được thiết kế xoay quanh các thực thể chính n
 Để tối ưu hóa chi phí vận hành đám mây và nâng cao trải nghiệm người dùng, hệ thống không sử dụng mô hình cơ sở dữ liệu quan hệ truyền thống mà áp dụng mô hình kiến trúc hướng tài liệu (Document-Oriented NoSQL) trên \textbf{Firebase Cloud Firestore}, kết hợp với \textbf{Firebase Authentication}.
 
 \subsection{Xác thực và Phân vùng dữ liệu theo UID}
-Sau khi \textbf{Firebase Authentication} xác thực người dùng thành công và cấp một mã \texttt{UID} duy nhất, mã này đóng vai trò là gốc (Root Key) cho mọi truy vấn dữ liệu từ xa. Toàn bộ dữ liệu cá nhân hóa của người dùng không nằm chung một bảng lớn mà được phân rã thành các bộ sưu tập con (Sub-collections) độc lập, cô lập hoàn toàn theo \texttt{UID}. Cấu trúc cây dữ liệu được tối ưu hóa như sau:
+Sau khi \textbf{Firebase Authentication} xác thực người dùng thành công và cấp một mã \texttt{UID} duy nhất, mã này đóng vai trò là gốc (Root Key) cho các truy vấn dữ liệu cá nhân. Dữ liệu ứng dụng không nằm chung một bảng lớn mà được phân rã thành các bộ sưu tập con (Sub-collections) độc lập. Cấu trúc cây dữ liệu trên Firestore được tổ chức như sau:
 
 \begin{itemize}
-    \item \path{users/{UID}/favorite_mangas/{manga_id}}: Lưu trữ danh sách truyện yêu thích.
-    \item \path{users/{UID}/reading_progress/{chapter_id}}: Lưu chi tiết tiến trình đọc (vị trí trang dở).
+    \item \path{users/{userId}/library/{mangaId}}: Lưu trữ danh sách truyện được người dùng lưu hoặc theo dõi vào thư viện cá nhân.
+    \item \path{users/{userId}/progress/{chapterId}}: Lưu chi tiết tiến trình đọc (trạng thái đọc, số trang đã đọc) của từng chương.
+    \item \path{manga_reviews/{mangaId}/reviews/{authorUid}}: Lưu các đánh giá công khai (gồm điểm số và bình luận) của người dùng về từng bộ truyện.
 \end{itemize}
 
-Cách thiết kế NoSQL phân cấp này là tối ưu nhất vì nó loại bỏ hoàn toàn các thao tác lọc dữ liệu (\texttt{Filter/Query}) tốn kém trên Cloud. Mỗi thiết bị chỉ truy cập trực tiếp vào đúng phân vùng của mình thông qua đường dẫn trực tiếp chứa \texttt{UID}.
+Cách thiết kế NoSQL phân cấp này là tối ưu nhất vì nó loại bỏ hoàn toàn các thao tác lọc dữ liệu phức tạp (\texttt{Filter/Query}) tốn kém trên Cloud. Mỗi thiết bị có thể truy cập trực tiếp vào vùng dữ liệu của mình thông qua đường dẫn chứa \texttt{UID}.
 
 \subsection{Cơ chế đồng bộ tối ưu (Offline-First Sync)}
 Mối tương quan giữa cơ sở dữ liệu cục bộ (Room) và đám mây (Firebase) được thiết kế theo mô hình lai nhằm tối ưu hóa băng thông mạng:
