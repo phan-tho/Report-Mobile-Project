@@ -184,26 +184,8 @@ Cơ sở dữ liệu được thiết kế xoay quanh các thực thể chính n
     \label{fig:db_schema}
 \end{figure}
 
-\subsection{Cài đặt mô hình bằng Room Database}
-Trong Android Jetpack, việc ánh xạ từ mô hình ERD lý thuyết sang cơ sở dữ liệu SQLite vật lý được thực hiện thông qua các Data Class kết hợp với Annotation của Room. 
-% Dưới đây là ví dụ tiêu biểu cho bảng \texttt{library\_items} (Thư viện truyện) - thực thể đóng vai trò trung tâm liên kết các bảng khác:
-
-% \begin{lstlisting}[language=Kotlin, caption={Cài đặt Entity cho bảng library\_items}]
-% @Entity(tableName = "library_items")
-% data class LibraryItemEntity(
-%     @PrimaryKey
-%     @ColumnInfo(name = "manga_id") val mangaId: String,
-    
-%     @ColumnInfo(name = "title") val title: String,
-%     @ColumnInfo(name = "cover_url") val coverUrl: String,
-%     @ColumnInfo(name = "is_favorite") val isFavorite: Boolean = false,
-    
-%     @ColumnInfo(name = "last_read_chapter_id") val lastReadChapterId: String?,
-%     @ColumnInfo(name = "updated_at") val updatedAt: Long
-% )
-% \end{lstlisting}
-
-Để thực hiện các thao tác thao tác truy vấn (Thêm, Sửa, Xóa, Đọc dữ liệu), hệ thống định nghĩa một Data Access Object (DAO). Các hàm truy vấn được thiết kế kết hợp chặt chẽ với \texttt{suspend} function (cho tác vụ lưu trữ 1 lần) và \texttt{Flow} (để quan sát sự thay đổi dữ liệu liên tục), giúp giao diện luôn đồng bộ hóa theo thời gian thực:
+% \subsection{Cài đặt mô hình bằng Room Database}
+Ánh xạ dữ liệu được thực hiện thông qua các Data Class kết hợp với Annotation của Room. Hệ thống định nghĩa một Data Access Object (DAO). Các hàm truy vấn được thiết kế kết hợp chặt chẽ với \texttt{suspend} function và \texttt{Flow}, giúp giao diện luôn đồng bộ hóa theo thời gian thực.
 
 % \begin{lstlisting}[language=Kotlin, caption={Định nghĩa các truy vấn dữ liệu thông qua LibraryDao}]
 % @Dao
@@ -228,25 +210,34 @@ Trong Android Jetpack, việc ánh xạ từ mô hình ERD lý thuyết sang cơ
     \item \textbf{Lưu trữ file vật lý (Internal Storage):} Các trang truyện thực tế được lưu trực tiếp dưới dạng tệp tin ảnh vào bộ nhớ trong của thiết bị với đường dẫn cô lập: \texttt{/files/offline\_manga/\{manga\_id\}/\{chapter\_id\}/}. Tại mỗi thư mục chương sẽ lưu các trang ảnh và một tệp \texttt{.complete} để xác nhận chương đã tải toàn vẹn.
 \end{itemize}
 
-\section{Thiết kế quản lý tài khoản người dùng}
+\section{Kiến trúc quản lý tài khoản và đồng bộ đám mây (Firebase)}
 
-Hệ thống quản lý tài khoản trong ứng dụng được thiết kế theo hướng tách biệt hoàn toàn giữa dịch vụ xác thực đám mây và cơ sở dữ liệu cục bộ nhằm tối ưu hóa hiệu suất và giảm thiểu dư thừa dữ liệu.
+Để tối ưu hóa chi phí vận hành đám mây và nâng cao trải nghiệm người dùng, hệ thống không sử dụng mô hình cơ sở dữ liệu quan hệ truyền thống mà áp dụng mô hình kiến trúc hướng tài liệu (Document-Oriented NoSQL) trên \textbf{Firebase Cloud Firestore}, kết hợp với \textbf{Firebase Authentication}.
 
-\subsection{Xác thực phía Cloud (Firebase Authentication)}
-Toàn bộ quy trình định danh, đăng ký, đăng nhập và quản lý phiên hoạt động được xử lý độc lập bởi \textbf{Firebase Authentication}. Khi người dùng đăng nhập thành công, hệ thống chỉ nhận về và sử dụng chuỗi định danh duy nhất (\texttt{UID}) để làm token xác thực cho các luồng gọi API (như đồng bộ dữ liệu thư viện lên server), hoàn toàn không lưu trữ thông tin cá nhân (tên, email) vào cơ sở dữ liệu cục bộ.
+\subsection{Xác thực và Phân vùng dữ liệu theo UID}
+Sau khi \textbf{Firebase Authentication} xác thực người dùng thành công và cấp một mã \texttt{UID} duy nhất, mã này đóng vai trò là gốc (Root Key) cho mọi truy vấn dữ liệu từ xa. Toàn bộ dữ liệu cá nhân hóa của người dùng không nằm chung một bảng lớn mà được phân rã thành các bộ sưu tập con (Sub-collections) độc lập, cô lập hoàn toàn theo \texttt{UID}. Cấu trúc cây dữ liệu được tối ưu hóa như sau:
 
-\subsection{Sự độc lập của Local Database}
-Khác với các kiến trúc truyền thống, cơ sở dữ liệu Room cục bộ của ứng dụng không sử dụng thực thể \texttt{User}. Các bảng dữ liệu như \texttt{library\_items} (thư viện truyện) hay \texttt{chapter\_progress} (tiến trình đọc) hoạt động độc lập và đóng vai trò như một bộ nhớ đệm (Local Cache). Cách tiếp cận này mang lại hai ưu điểm lớn:
 \begin{itemize}
-    \item \textbf{Tối giản hóa CSDL:} Tránh việc phải duy trì và đồng bộ một bảng User cục bộ không cần thiết.
-    \item \textbf{Trải nghiệm Offline-first linh hoạt:} Người dùng hoàn toàn có thể thêm truyện vào thư viện và lưu tiến trình đọc trực tiếp trên thiết bị (Guest Mode) mà không bắt buộc phải đăng nhập.
+    \item \path{users/{UID}/favorite_mangas/{manga_id}}: Lưu trữ danh sách truyện yêu thích.
+    \item \path{users/{UID}/reading_progress/{chapter_id}}: Lưu chi tiết tiến trình đọc (vị trí trang dở).
 \end{itemize}
+
+Cách thiết kế NoSQL phân cấp này là tối ưu nhất vì nó loại bỏ hoàn toàn các thao tác lọc dữ liệu (\texttt{Filter/Query}) tốn kém trên Cloud. Mỗi thiết bị chỉ truy cập trực tiếp vào đúng phân vùng của mình thông qua đường dẫn trực tiếp chứa \texttt{UID}.
+
+\subsection{Cơ chế đồng bộ tối ưu (Offline-First Sync)}
+Mối tương quan giữa cơ sở dữ liệu cục bộ (Room) và đám mây (Firebase) được thiết kế theo mô hình lai nhằm tối ưu hóa băng thông mạng:
+
+\begin{enumerate}
+    \item \textbf{Single Source of Truth (SSOT):} Room Database tại local đóng vai trò là nguồn dữ liệu duy nhất điều khiển giao diện UI. Khi người dùng nhấn thích truyện hoặc đọc đến một trang mới, ứng dụng sẽ lập tức cập nhật vào Room (\texttt{library\_items} và \texttt{chapter\_progress}) để đảm bảo phản hồi giao diện ngay lập tức mà không phụ thuộc vào tốc độ mạng.
+    \item \textbf{Đồng bộ hóa bất đối xứng:} Khi thiết bị có kết nối mạng ổn định, tầng Data Layer (Repository) sẽ kích hoạt luồng đồng bộ đẩy các bản ghi có sự thay đổi trạng thái (\texttt{sync\_status = PENDING}) lên phân vùng tương ứng trên Firebase. 
+    \item \textbf{Tối ưu hóa lượt đọc/ghi (Read/Write):} Tiến trình đọc dở trong một chương (\texttt{last\_read\_page\_index}) thay vì đẩy liên tục lên đám mây theo từng giây người dùng lật trang, hệ thống chỉ thực hiện đồng bộ khi người dùng thoát chương, bấm dừng hoặc theo chu kỳ thời gian (Debounce/WorkManager). Cơ chế này giúp giảm tới 80\% chi phí số lần gọi API lên Firebase Cloud.
+\end{enumerate}
 
 \section{Thiết kế Trải nghiệm Người dùng (UX/UI) và Tính tương thích}
 
 Do đặc thù của ứng dụng đọc truyện tranh, giao diện hiển thị yêu cầu sự linh hoạt cao để tối ưu hóa không gian đọc cho người dùng. Các tiêu chí thiết kế được đảm bảo bao gồm:
 
 \begin{itemize}
-    \item \textbf{Khả năng đáp ứng (Responsive Design):} Giao diện được thiết kế để tự động thay đổi bố cục linh hoạt trên các kích thước màn hình khác nhau.
-    \item \textbf{Xử lý thay đổi cấu hình (Configuration Changes):} Hệ thống hỗ trợ xoay màn hình (Portrait/Landscape) mượt mà, đảm bảo không cần gọi lại API hay truy vấn lại cơ sở dữ liệu.
+    \item \textbf{Khả năng đáp ứng (Responsive Design):} Giao diện được thiết kế để tự động thay đổi bố cục linh hoạt trên các kích thước màn hình khác nhau. Ví dụ khi xoay ngang màn hình, thành pill navigation bottom bar được chuyển sang bên.
+    \item \textbf{Xử lý thay đổi cấu hình (Configuration Changes):} Hệ thống hỗ trợ xoay màn hình (Portrait/Landscape) mượt mà, đảm bảo không cần gọi lại API hay truy vấn lại cơ sở dữ liệu. 
 \end{itemize}
