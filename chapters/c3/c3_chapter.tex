@@ -26,12 +26,12 @@ Bên cạnh các tính năng nghiệp vụ, hệ thống cần đảm bảo các
 \section{Thiết kế hệ thống chi tiết}
 
 \subsection{Sơ đồ Use Case tổng quát}
-Sơ đồ Use Case thể hiện sự tương tác giữa người dùng (Người đọc) và hệ thống ứng dụng, cũng như sự giao tiếp của ứng dụng với các hệ thống bên ngoài (MangaDex API, Firebase).
+Sơ đồ Use Case thể hiện sự tương tác giữa người dùng (Người đọc) và hệ thống ứng dụng.
 
 \begin{figure}[H]
     \centering
     % TODO: Chèn ảnh Sơ đồ Use case tổng ở đây
-    \includegraphics[width=0.8\textwidth]{figures/usecase_tong.png}
+    \includegraphics[width=1\textwidth]{figures/usecase_tong.pdf}
     \caption{Sơ đồ Use Case tổng quát của ứng dụng MyBooksLibrary}
     \label{fig:usecase_tong}
 \end{figure}
@@ -88,13 +88,18 @@ Sau đây là đặc tả chi tiết cho 3 Use Case cốt lõi nhất của hệ
 \end{longtable}
 
 % Bảng đặc tả Use Case 2
-\begin{table}[H]
-    \centering
-    \caption{Đặc tả Use Case: Xem chi tiết và Đọc truyện}
-    \label{tab:uc_read}
-    \begin{tabular}{|p{3.5cm}|p{11.5cm}|}
+% Hãy đảm bảo bạn đã thêm \usepackage{longtable} ở phần Preamble
+
+\begin{longtable}{|p{3.5cm}|p{11.5cm}|}
+    \caption{Đặc tả Use Case: Xem chi tiết và Đọc truyện} \label{tab:uc_read} \\
     \hline
     \textbf{Thuộc tính} & \textbf{Mô tả} \\ \hline
+    \endfirsthead % Kết thúc tiêu đề trang đầu tiên
+
+    \hline
+    \textbf{Thuộc tính} & \textbf{Mô tả} (tiếp theo) \\ \hline
+    \endhead % Tiêu đề lặp lại ở các trang sau
+
     \textbf{Mã UC} & UC-02 \\ \hline
     \textbf{Tên Use Case} & Xem chi tiết và Đọc truyện \\ \hline
     \textbf{Tác nhân} & Người dùng, MangaDex API \\ \hline
@@ -108,8 +113,8 @@ Sau đây là đặc tả chi tiết cho 3 Use Case cốt lõi nhất của hệ
     4. Hệ thống tải đường dẫn ảnh của chương đó qua At-Home API và hiển thị màn hình Đọc truyện. \newline
     5. Người dùng vuốt màn hình để chuyển trang. Coil tự động tải và hiển thị hình ảnh. \newline
     6. Khi người dùng thoát, hệ thống tự động lưu lại vị trí trang hiện tại vào Room Database. \\ \hline
-    \end{tabular}
-\end{table}
+\end{longtable}
+
 
 % Bảng đặc tả Use Case 3
 \begin{table}[H]
@@ -238,8 +243,6 @@ Mối tương quan giữa cơ sở dữ liệu cục bộ (Room) và đám mây 
 \section{Thiết kế Trải nghiệm Người dùng (UX/UI) và Tính tương thích}
 
 Ứng dụng đọc truyện tranh đòi hỏi giao diện linh hoạt để tối ưu không gian đọc. Nhờ thiết kế đáp ứng (Responsive Design), bố cục giao diện tự động tương thích với mọi kích thước màn hình. Ví dụ khi xoay ngang màn hình, thanh điều hướng bottom bar dạng viên thuốc sẽ linh hoạt chuyển sang cạnh bên.
-
-% Do đặc thù của ứng dụng đọc truyện tranh, giao diện hiển thị yêu cầu sự linh hoạt cao để tối ưu hóa không gian đọc cho người dùng. Các tiêu chí thiết kế được đảm bảo bao gồm:
 
 % \begin{itemize}
 %     \item \textbf{Khả năng đáp ứng (Responsive Design):} Giao diện được thiết kế để tự động thay đổi bố cục linh hoạt trên các kích thước màn hình khác nhau. Ví dụ khi xoay ngang màn hình, thành pill navigation bottom bar được chuyển sang bên.

@@ -1,0 +1,134 @@
+full
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Người dùng" as User
+actor "MangaDex API" as API
+actor "Firebase Cloud" as Firebase
+
+rectangle "Ứng dụng MyBooksLibrary" {
+  
+  ' ---- CỘT 1 ----
+  together {
+    usecase "Khám phá truyện" as UC_Discover
+    usecase "Tìm kiếm & Lọc truyện" as UC_Search
+    usecase "Quản lý Thư viện" as UC_Library
+    usecase "Quản lý Tải xuống" as UC_ManageDL
+    usecase "Đọc truyện" as UC_Read
+    usecase "Lưu/Bỏ lưu truyện" as UC_Bookmark
+    usecase "Tải truyện offline" as UC_Download
+    usecase "Đánh giá truyện" as UC_Review
+    usecase "Đồng bộ dữ liệu" as UC_Sync
+  }
+  
+  ' ---- CỘT 2 ----
+  together {
+    usecase "Xem chi tiết truyện" as UC_Detail
+    usecase "Đăng nhập" as UC_Login
+  }
+  
+  ' Ép layout cột từ trái sang phải
+  UC_Discover -[hidden]-> UC_Detail
+  UC_Library -[hidden]-> UC_Login
+}
+
+' User tương tác (Có mũi tên ở đầu Use Case)
+User --> UC_Discover
+User --> UC_Search
+User --> UC_Detail
+User --> UC_Library
+User --> UC_ManageDL
+User --> UC_Login
+User --> UC_Review
+
+' Extend
+UC_Read .> UC_Detail : <<extend>>
+UC_Bookmark .> UC_Detail : <<extend>>
+UC_Download .> UC_Detail : <<extend>>
+UC_Review .> UC_Detail : <<extend>>
+
+' Include
+UC_Sync .> UC_Login : <<include>>
+UC_Review .> UC_Login : <<include>>
+
+' Tương tác API
+UC_Discover -- API
+UC_Search -- API
+UC_Detail -- API
+UC_Read -- API
+
+' Tương tác Firebase
+UC_Bookmark -- Firebase
+UC_Review -- Firebase
+UC_Sync -- Firebase
+UC_Login -- Firebase
+
+@enduml
+
+
+
+short
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+' Thiết lập đường thẳng thay vì đường cong mềm
+' skinparam linetype polyline
+
+' Tăng khoảng cách dọc (nodesep) và ngang (ranksep) để các ô cách xa nhau hơn
+' skinparam nodesep 60
+skinparam ranksep 150
+
+actor "Người dùng" as User
+
+rectangle "Ứng dụng MangaVN" {
+  
+  ' ---- CỘT 1 ----
+  together {
+    usecase "Khám phá truyện" as UC_Discover
+    usecase "Tìm kiếm & Lọc truyện" as UC_Search
+    usecase "Quản lý Thư viện" as UC_Library
+    usecase "Quản lý Tải xuống" as UC_ManageDL
+    usecase "Đọc truyện" as UC_Read
+    usecase "Lưu/Bỏ lưu truyện" as UC_Bookmark
+    usecase "Tải truyện offline" as UC_Download
+    usecase "Đánh giá truyện" as UC_Review
+    usecase "Đồng bộ dữ liệu" as UC_Sync
+  }
+  
+  ' ---- CỘT 2 ----
+  together {
+    usecase "Xem chi tiết truyện" as UC_Detail
+    usecase "Đăng nhập" as UC_Login
+  }
+  
+  ' Ép layout cột từ trái sang phải
+  UC_Discover -[hidden]-> UC_Detail
+  UC_Library -[hidden]-> UC_Login
+}
+
+
+' User tương tác (Có mũi tên ở đầu Use Case)
+User --> UC_Discover
+User --> UC_Search
+' User --> UC_Detail
+User --> UC_Library
+User --> UC_ManageDL
+User --> UC_Login
+User --> UC_Review
+User --> UC_Read
+User --> UC_Bookmark
+User --> UC_Download
+
+' Extend
+UC_Read .> UC_Detail : <<extend>>
+UC_Bookmark .> UC_Detail : <<extend>>
+UC_Download .> UC_Detail : <<extend>>
+UC_Review .> UC_Detail : <<extend>>
+
+' Include
+UC_Sync .> UC_Login : <<include>>
+UC_Review .> UC_Login : <<include>>
+
+@enduml
