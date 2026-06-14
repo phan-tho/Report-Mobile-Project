@@ -6,9 +6,9 @@ Dựa trên việc đọc mã nguồn tại các lớp UI (`app/src/main/java/co
 Ứng dụng **MyBooksLibrary** xoay quanh việc mang lại trải nghiệm đọc sách/truyện liền mạch, bao gồm:
 1.  **Khám phá truyện (Discover)**: Hiển thị các bộ truyện mới cập nhật, phổ biến, hoặc theo xu hướng từ nguồn mạng (MangaDex API).
 2.  **Tìm kiếm và Lọc (Search & Filter)**: Tìm kiếm truyện theo tên và sử dụng các bộ lọc nâng cao (SearchFilterSheet) để tìm truyện theo thể loại, tác giả.
-3.  **Xem chi tiết và Đọc truyện (MangaDetail & Reader)**: Xem thông tin chi tiết truyện (tóm tắt, tác giả, đánh giá), lấy danh sách chương và giao diện đọc truyện hỗ trợ cả hai chế độ dọc và ngang.
+3.  **Xem chi tiết và Đọc truyện (MangaDetail & Reader)**: Xem thông tin chi tiết truyện (tóm tắt, tác giả, đánh giá), lấy danh sách chương và giao diện đọc truyện hỗ trợ cả hai chế độ dọc và ngang, có Telephoto để hỗ trợ zoom ảnh.
 4.  **Thư viện cá nhân (Library)**: Lưu trữ các bộ truyện người dùng yêu thích, đánh dấu trạng thái (đang đọc, đã hoàn thành...).
-5.  **Tải xuống ngoại tuyến (Downloads)**: Tải trước các chương truyện để đọc offline.
+5.  **Tải xuống ngoại tuyến (Downloads)**: Tải trước các chương truyện để đọc offline, có thông báo gắn deep link tiến trình tải.
 6.  **Thống kê và Lịch sử (Statistics & History)**: Lưu trữ lịch sử các chương đã đọc, hiển thị biểu đồ thống kê thói quen đọc.
 7.  **Quản lý Tài khoản (Profile & Auth)**: Đăng nhập (Google Sign-In), đồng bộ dữ liệu người dùng (tiến trình đọc, thư viện) lên nền tảng đám mây (Firebase).
 

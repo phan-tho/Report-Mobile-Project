@@ -17,7 +17,7 @@ Chương này đi sâu vào việc phân tích các yêu cầu của ứng dụn
 \subsection{Yêu cầu phi chức năng}
 Bên cạnh các tính năng nghiệp vụ, hệ thống cần đảm bảo các tiêu chuẩn kỹ thuật sau:
 \begin{itemize}
-    \item \textbf{Hiệu năng:} Thời gian tải màn hình danh sách và nội dung trang truyện không được vượt quá 3 giây trong điều kiện mạng ổn định. Giao diện vuốt trang phải đạt 60 FPS (khung hình/giây).
+    \item \textbf{Hiệu năng:} Thời gian tải màn hình danh sách và nội dung trang truyện không được vượt quá 3 giây trong điều kiện mạng ổn định. Giao diện vuốt trang phải có độ trễ dưới 200ms.
     \item \textbf{Khả năng tương thích:} Ứng dụng phải hoạt động ổn định trên các thiết bị Android từ API level 30 (Android 11) trở lên, tự động điều chỉnh giao diện phù hợp với nhiều kích thước màn hình (điện thoại, máy tính bảng).
     \item \textbf{Tính khả dụng ngoại tuyến:} Các truyện đã tải xuống phải được truy xuất và đọc mượt mà ngay cả khi thiết bị ngắt kết nối Internet hoàn toàn.
     \item \textbf{Kiến trúc mã nguồn:} Mã nguồn phải tuân thủ nghiêm ngặt nguyên lý Clean Architecture và SOLID, giúp dễ dàng bảo trì và mở rộng tính năng sau này.
@@ -208,6 +208,7 @@ Cơ sở dữ liệu được thiết kế xoay quanh các thực thể chính n
 \begin{itemize}
     \item \textbf{Quản lý trạng thái bằng SQLite:} CSDL Room chỉ quản lý hàng đợi tải (\texttt{DownloadQueueEntity}) và lưu cờ trạng thái \texttt{is\_downloaded} trong \\ \texttt{ChapterProgressEntity}. Việc này giúp tránh lưu trữ file ảnh lớn (BLOB) trực tiếp vào SQLite, ngăn chặn tình trạng tràn bộ nhớ \\ (\texttt{CursorWindowAllocationException}) và giữ CSDL luôn gọn nhẹ.
     \item \textbf{Lưu trữ file vật lý (Internal Storage):} Các trang truyện thực tế được lưu trực tiếp dưới dạng tệp tin ảnh vào bộ nhớ trong của thiết bị với đường dẫn cô lập: \texttt{/files/offline\_manga/\{manga\_id\}/\{chapter\_id\}/}. Tại mỗi thư mục chương sẽ lưu các trang ảnh và một tệp \texttt{.complete} để xác nhận chương đã tải toàn vẹn.
+    \item \textbf{Thông báo trạng thái tải và Deep Link:} Hệ thống cung cấp thông báo (Notification) trực quan trên thanh trạng thái để cập nhật tiến trình tải truyện cho người dùng. Khi một chương tải xong, ứng dụng phát ra thông báo hoàn tất có tích hợp Deep Link, cho phép người dùng nhấn vào để điều hướng ngay lập tức đến giao diện đọc của chương truyện đó.
 \end{itemize}
 
 \section{Kiến trúc quản lý tài khoản và đồng bộ đám mây (Firebase)}
@@ -236,9 +237,11 @@ Mối tương quan giữa cơ sở dữ liệu cục bộ (Room) và đám mây 
 
 \section{Thiết kế Trải nghiệm Người dùng (UX/UI) và Tính tương thích}
 
-Do đặc thù của ứng dụng đọc truyện tranh, giao diện hiển thị yêu cầu sự linh hoạt cao để tối ưu hóa không gian đọc cho người dùng. Các tiêu chí thiết kế được đảm bảo bao gồm:
+Ứng dụng đọc truyện tranh đòi hỏi giao diện linh hoạt để tối ưu không gian đọc. Nhờ thiết kế đáp ứng (Responsive Design), bố cục giao diện tự động tương thích với mọi kích thước màn hình. Ví dụ khi xoay ngang màn hình, thanh điều hướng bottom bar dạng viên thuốc sẽ linh hoạt chuyển sang cạnh bên.
 
-\begin{itemize}
-    \item \textbf{Khả năng đáp ứng (Responsive Design):} Giao diện được thiết kế để tự động thay đổi bố cục linh hoạt trên các kích thước màn hình khác nhau. Ví dụ khi xoay ngang màn hình, thành pill navigation bottom bar được chuyển sang bên.
-    \item \textbf{Xử lý thay đổi cấu hình (Configuration Changes):} Hệ thống hỗ trợ xoay màn hình (Portrait/Landscape) mượt mà, đảm bảo không cần gọi lại API hay truy vấn lại cơ sở dữ liệu. 
-\end{itemize}
+% Do đặc thù của ứng dụng đọc truyện tranh, giao diện hiển thị yêu cầu sự linh hoạt cao để tối ưu hóa không gian đọc cho người dùng. Các tiêu chí thiết kế được đảm bảo bao gồm:
+
+% \begin{itemize}
+%     \item \textbf{Khả năng đáp ứng (Responsive Design):} Giao diện được thiết kế để tự động thay đổi bố cục linh hoạt trên các kích thước màn hình khác nhau. Ví dụ khi xoay ngang màn hình, thành pill navigation bottom bar được chuyển sang bên.
+%     \item \textbf{Xử lý thay đổi cấu hình (Configuration Changes):} Hệ thống hỗ trợ xoay màn hình (Portrait/Landscape) mượt mà, đảm bảo không cần gọi lại API hay truy vấn lại cơ sở dữ liệu. 
+% \end{itemize}
